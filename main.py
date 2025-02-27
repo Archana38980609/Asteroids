@@ -16,8 +16,14 @@ def main():
     clock = pygame.time.Clock()
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     dt = 0
-    running = True
+   
+    updatable = pygame.sprite.Group()
+    drawable = pygame.sprite.Group()
+    player.containers = (updatable,drawable)
+    for sprite in drawable:
+        screen.blit(sprite.image, sprite.rect)
 
+    running = True
     while running:
         screen.fill(BACKGROUND_COLOR)
         
