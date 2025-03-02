@@ -1,13 +1,14 @@
 import pygame
 from circleshape import CircleShape
-from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED
+from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOOT_SPEED, PLAYER_SHOOT_COOLDOWN
 from shot import Shot
 
 class Player(CircleShape):
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
-        self.shots_group = None  # This will be set in main()
+        self.shots_group = None  # Set this in main()
+        self.shoot_timer = 0  # Timer for rate limiting
 
     def triangle(self):
         forward = pygame.Vector2(0, -1).rotate(-self.rotation)
@@ -28,12 +29,20 @@ class Player(CircleShape):
         self.position += forward * direction * PLAYER_SPEED * dt
 
     def shoot(self):
-        if self.shots_group is not None:
+        """Creates and fires a shot only if cooldown has expired."""
+        if self.shoot_timer <= 0 and self.shots_group is not None:
             shot = Shot(self.position.x, self.position.y, -self.rotation)
             self.shots_group.add(shot)
+            self.shoot_timer = PLAYER_SHOOT_COOLDOWN  # Reset cooldown timer
 
     def update(self, dt):
+        """Handles movement, shooting cooldown, and updates."""
         super().update(dt)
+
+        # Reduce the shoot timer each frame
+        if self.shoot_timer > 0:
+            self.shoot_timer -= dt
+
         keys = pygame.key.get_pressed()
         
         if keys[pygame.K_LEFT]:
@@ -46,5 +55,5 @@ class Player(CircleShape):
         if keys[pygame.K_DOWN]:
             self.move(-1, dt)
 
-        if keys[pygame.K_SPACE]:  # Fire bullet
+        if keys[pygame.K_SPACE]:  # Fire bullet if allowed
             self.shoot()
