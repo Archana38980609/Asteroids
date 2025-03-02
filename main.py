@@ -51,6 +51,14 @@ def main():
                 print("Game over!")
                 sys.exit()
 
+        # NEW: Check for shot-asteroid collisions
+        for shot in shots:
+            for asteroid in asteroids:
+                if shot.collide(asteroid):  # Ensure the collide() method is correctly implemented
+                    shot.kill()  # Remove the bullet
+                    asteroid.kill()  # Remove the asteroid
+                    break  # Stop checking once this shot has hit something
+
         # Draw everything
         for sprite in drawable:
             sprite.draw(screen)
