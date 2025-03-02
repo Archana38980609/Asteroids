@@ -4,6 +4,8 @@ from constants import *  # Import everything from constants.py
 from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
+from shot import Shot
+
 BACKGROUND_COLOR = (0, 0, 0)  # Black color
 
 def main():
@@ -20,12 +22,16 @@ def main():
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
     asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()  # NEW: Shot group
 
     Player.containers = (updatable, drawable)
     Asteroid.containers = (asteroids, updatable, drawable)
+    Shot.containers = (shots, updatable, drawable)  # NEW: Add shots to groups
     AsteroidField.containers = (updatable,)
 
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+    player.shots_group = shots  # NEW: Player can now shoot bullets
+
     asteroid_field = AsteroidField()
 
     running = True
@@ -38,12 +44,14 @@ def main():
         
         dt = clock.tick(60) / 1000
         updatable.update(dt)
-        
+
+        # Check for player-asteroid collisions
         for asteroid in asteroids:
             if player.collide(asteroid):
                 print("Game over!")
                 sys.exit()
 
+        # Draw everything
         for sprite in drawable:
             sprite.draw(screen)
         
@@ -53,4 +61,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
