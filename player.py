@@ -1,6 +1,6 @@
 import pygame
 from circleshape import CircleShape
-from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOOT_SPEED, PLAYER_SHOOT_COOLDOWN
+from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOOT_SPEED, PLAYER_SHOOT_COOLDOWN, SCREEN_WIDTH, SCREEN_HEIGHT 
 from shot import Shot
 
 class Player(CircleShape):
@@ -57,3 +57,13 @@ class Player(CircleShape):
 
         if keys[pygame.K_SPACE]:  # Fire bullet if allowed
             self.shoot()
+
+        if self.position.x > SCREEN_WIDTH + self.radius: 
+            self.position.x = 0 - self.radius 
+        elif self.position.x < 0 - self.radius: 
+            self.position.x = SCREEN_WIDTH + self.radius 
+
+        if self.position.y > SCREEN_HEIGHT + self.radius: 
+            self.position.y = 0 - self.radius 
+        elif self.position.y < 0 - self.radius: 
+            self.position.y = SCREEN_HEIGHT + self.radius 
