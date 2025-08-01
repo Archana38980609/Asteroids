@@ -34,6 +34,12 @@ def main():
     score = 0
     font = pygame.font.SysFont(None, 36)  # Set up font for score display
 
+    # Initialize lives and respawn variables
+    lives = 3
+    respawn_timer = 0
+    respawn_delay = 2  # seconds
+    player_alive = True
+
     # Create player at center
     player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
     player.shots_group = shots
@@ -62,24 +68,41 @@ def main():
         asteroid_field.update(dt)
         updatable.update(dt)
 
-        # Check for player-asteroid collisions
-        for asteroid in asteroids:
-            if player.collide(asteroid):
-                print("Game over!")
-                pygame.quit()
-                sys.exit()
+        if player_alive:
+            # Check for player-asteroid collisions
+            for asteroid in asteroids:
+                if player.collide(asteroid):
+                    lives -= 1
+                    player_alive = False
+                    respawn_timer = respawn_delay
+                    print(f'Life lost! Lives remaining: {lives}')
+                    if lives <= 0:
+                        print("Game over!")
+                        pygame.quit()
+                        sys.exit()
+                    # Remove player from drawable and updatable groups
+                    player.kill()
+                    break
+        else:
+            respawn_timer -= dt
+            if respawn_timer <= 0 and lives > 0:
+                # Respawn the player at center
+                player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+                player.shots_group = shots
+                Player.containers = (updatable, drawable)  # Ensure new player is added to groups
+                player_alive = True
 
-        # Check for shot-asteroid collisions and split asteroids with scoring
+        # Check for shot-asteroid collisions with scoring
         for shot in list(shots):
             for asteroid in list(asteroids):
                 if shot.collide(asteroid):
                     shot.kill()
                     asteroid.split()
-                    # Increase score based on asteroid size
+                    # Example scoring (you can update to your scoring scheme)
                     size_score_map = {
-                        ASTEROID_MAX_RADIUS: 25,                # Large asteroid hit gives 25 points
-                        ASTEROID_MIN_RADIUS * 2: 35,            # Medium-sized asteroid gives 35
-                        ASTEROID_MIN_RADIUS: 50                 # Small asteroid gives 50 points
+                        ASTEROID_MAX_RADIUS: 25,
+                        ASTEROID_MIN_RADIUS * 2: 35,
+                        ASTEROID_MIN_RADIUS: 50
                     }
                     asteroid_score = size_score_map.get(asteroid.radius, 0)
                     score += asteroid_score
@@ -89,9 +112,11 @@ def main():
         for sprite in drawable:
             sprite.draw(screen)
 
-        # Display the score on the screen
+        # Display the score and lives on screen
         score_surface = font.render(f'Score: {score}', True, (255, 255, 255))
+        lives_surface = font.render(f'Lives: {lives}', True, (255, 255, 255))
         screen.blit(score_surface, (10, 10))
+        screen.blit(lives_surface, (10, 50))
 
         pygame.display.update()
     
